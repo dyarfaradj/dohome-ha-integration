@@ -1,0 +1,11 @@
+{
+  "name": "DoHome Integration",
+  "version": "1.0.0",
+  "slug": "dohome-integration",
+  "description": "Integration for controlling DoHome devices",
+  "url": "https://github.com/dyarfaradj/dohome-ha-integration",
+  "startup": "before",
+  "log_level": "info",
+  "discovery_ip": "192.168.1.255",
+  "discovery_retry": 2
+}
