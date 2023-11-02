@@ -1,6 +1,7 @@
 {
   "domain": "dohome-ha-integration",
-  "name": "DoHome integration for HomeAssistant",
+  "name": "DoHome Integration",
+  "slug": "dohome-integration",
   "issue_tracker": "",
   "documentation": "",
   "requirements": [],
