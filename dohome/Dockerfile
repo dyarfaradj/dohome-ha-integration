@@ -7,8 +7,6 @@ ENV LANG C.UTF-8
 ENV TERM xterm
 ENV TZ Europe/Amsterdam
 
-# Install any necessary dependencies or packages
-RUN apk add --no-cache some-package
 
 # Copy the addon directory (including run.sh) into the Docker image
 COPY . /addons/dohome_addon/
