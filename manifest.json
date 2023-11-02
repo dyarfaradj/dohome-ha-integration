@@ -1,0 +1,9 @@
+{
+  "domain": "dohome-ha-integration",
+  "name": "DoHome integration for HomeAssistant",
+  "issue_tracker": "",
+  "documentation": "",
+  "requirements": [],
+  "integration_type": "hub",
+  "version": "0.1"
+}
