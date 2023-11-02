@@ -6,6 +6,14 @@
   "url": "https://github.com/dyarfaradj/dohome-ha-integration",
   "startup": "before",
   "log_level": "info",
-  "discovery_ip": "192.168.1.255",
-  "discovery_retry": 2
+  "arch": ["armhf", "armv7", "aarch64"],
+  "boot": "manual",
+  "options": {},
+  "map": ["backup:rw"],
+  "devices": ["/dev/mem:rw", "/dev/gpiomem:rw"],
+  "privileged": ["SYS_RAWIO"],
+  "gpio": "true",
+  "apparmor": "true",
+  "ports": {},
+  "schema": {}
 }
