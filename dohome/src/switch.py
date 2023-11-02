@@ -6,7 +6,7 @@ from homeassistant.helpers.event import track_time_interval
 
 from homeassistant.components.switch import SwitchEntity
 
-from . import (DOHOME_GATEWAY, DoHomeDevice)
+from .. import (DOHOME_GATEWAY, DoHomeDevice)
 
 _LOGGER = logging.getLogger(__name)
 
