@@ -68,19 +68,34 @@ def setup(hass, config):
 
 def discover_devices_service(hass, call):
     """Service to trigger device discovery for a specified duration."""
-    duration = call.data.get('duration', 10)  # Default duration in seconds (10 seconds)
-    
-    hass.states.set(DOMAIN + '.discover_devices', 'active')
+    try:
+        # Validate duration with reasonable limits
+        duration = min(max(call.data.get('duration', 10), 1), 60)  # Min 1s, Max 60s
+        
+        hass.states.set(DOMAIN + '.discover_devices', 'active')
+        
+        if not DOHOME_GATEWAY:
+            _LOGGER.error("Gateway not initialized")
+            hass.states.set(DOMAIN + '.discover_devices', 'error')
+            return False
 
-    global DOHOME_GATEWAY
-    discovered_devices = DOHOME_GATEWAY._discover_devices(duration)
-
-    if discovered_devices:
-        for device_type, devices in discovered_devices.items():
-            for device in devices:
-                discovery.load_platform(hass, device_type, DOMAIN, {device['sid']: device}, {})
-
-    hass.states.set(DOMAIN + '.discover_devices', 'idle')
+        discovered_devices = DOHOME_GATEWAY._discover_devices(duration)
+        
+        if discovered_devices:
+            for device_type, devices in discovered_devices.items():
+                for device in devices:
+                    discovery.load_platform(hass, device_type, DOMAIN, {device['sid']: device}, {})
+            hass.states.set(DOMAIN + '.discover_devices', 'idle')
+            return True
+        else:
+            _LOGGER.warning("No devices discovered")
+            hass.states.set(DOMAIN + '.discover_devices', 'idle')
+            return False
+            
+    except Exception as err:
+        _LOGGER.error("Error during device discovery: %s", str(err))
+        hass.states.set(DOMAIN + '.discover_devices', 'error')
+        return False
     
 class DoHomeGateway:
     GATEWAY_DISCOVERY_PORT = 6091
