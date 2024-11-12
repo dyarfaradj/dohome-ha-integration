@@ -22,6 +22,7 @@ ATTR_NO_MOTION_SINCE = 'No motion since'
 
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.INFO)
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Perform the setup for DoHome devices."""

@@ -111,6 +111,7 @@ class DoHomeGateway:
         discovered_devices = defaultdict(list)
         
         try:
+            _LOGGER.info("Starting gateway finding for %d seconds.", duration)
             _socket.sendto('cmd=ping\r\n'.encode(), (DISCOVERY_IP, self.GATEWAY_DISCOVERY_PORT))
             _socket.settimeout(duration)  # Set socket timeout to 30 seconds
 

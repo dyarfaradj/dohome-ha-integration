@@ -1,8 +1,3 @@
-"""
-Support for DoHome
-
-Developed by Rave from hogc
-"""
 import logging
 import json
 import socket
@@ -14,7 +9,7 @@ from homeassistant.const import UnitOfTemperature
 from . import (DOHOME_GATEWAY, DoHomeDevice)
 
 _LOGGER = logging.getLogger(__name__)
-
+_LOGGER.setLevel(logging.INFO)
 
 
 TEMPERATURE_KEY = "temp"

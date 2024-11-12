@@ -1,6 +1,7 @@
 import logging
 import socket
 import json
+import asyncio
 from datetime import timedelta
 from homeassistant.helpers.event import track_time_interval
 import homeassistant.util.color as color_util
@@ -9,14 +10,14 @@ from homeassistant.components.light import (
     ATTR_RGBWW_COLOR,
     LightEntity,
     ColorMode,
-    LightEntityFeature
 )
 
 from . import (DOHOME_GATEWAY, DoHomeDevice)
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.INFO)
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     light_devices = []
     devices = DOHOME_GATEWAY.devices
     for (device_type, device_info) in devices.items():
@@ -26,8 +27,8 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
             if device['type'] == '_STRIPE' or device['type'] == '_DT-WYRGB':
                 light_devices.append(DoHomeLight(hass, device))
     
-    if len(light_devices) > 0:
-        add_devices(light_devices)
+    if light_devices:
+        async_add_entities(light_devices)
 
 
 class DoHomeLight(DoHomeDevice, LightEntity):
@@ -60,7 +61,7 @@ class DoHomeLight(DoHomeDevice, LightEntity):
     @property
     def supported_features(self):
         """Return the supported features."""
-        return LightEntityFeature.SUPPORT_BRIGHTNESS | LightEntityFeature.SUPPORT_COLOR
+        return ColorMode.BRIGHTNESS | ColorMode.HS
 
     @property
     def supported_color_modes(self):

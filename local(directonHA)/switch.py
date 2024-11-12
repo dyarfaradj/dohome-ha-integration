@@ -1,8 +1,3 @@
-"""
-Support for DoHome
-
-Developed by Rave from hogc
-"""
 import logging
 import socket
 import json
@@ -14,6 +9,7 @@ from homeassistant.components.switch import SwitchEntity
 from . import (DOHOME_GATEWAY, DoHomeDevice)
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.INFO)
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     switch_devices = []
