@@ -25,7 +25,7 @@ DOHOME_COMPONENTS = ['switch', 'light', 'sensor', 'binary_sensor']
 DOHOME_GATEWAY = None
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.DEBUG)
+_LOGGER.setLevel(logging.INFO)
 
 def get_alias(name):
     alias = {

@@ -1,8 +1,3 @@
-"""
-Support for DoHome
-
-Developed by Rave from hogc
-"""
 import logging
 import socket
 import json
@@ -11,14 +6,10 @@ from homeassistant.helpers.event import track_time_interval
 import homeassistant.util.color as color_util
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
-    ATTR_COLOR_TEMP,
-    ATTR_EFFECT,
     ATTR_RGBWW_COLOR,
-    PLATFORM_SCHEMA,
-    SUPPORT_BRIGHTNESS,
-    SUPPORT_COLOR,
     LightEntity,
-    ColorMode
+    ColorMode,
+    LightEntityFeature
 )
 
 from . import (DOHOME_GATEWAY, DoHomeDevice)
@@ -29,12 +20,13 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     light_devices = []
     devices = DOHOME_GATEWAY.devices
     for (device_type, device_info) in devices.items():
+        _LOGGER.info(f"Processing device type: {device_type}")
         for device in device_info:
-            _LOGGER.info(device)
-            if(device['type'] == '_STRIPE' or device['type'] == '_DT-WYRGB'):
+            _LOGGER.info(f"Device info: {device}")
+            if device['type'] == '_STRIPE' or device['type'] == '_DT-WYRGB':
                 light_devices.append(DoHomeLight(hass, device))
     
-    if(len(light_devices) > 0):
+    if len(light_devices) > 0:
         add_devices(light_devices)
 
 
@@ -68,7 +60,7 @@ class DoHomeLight(DoHomeDevice, LightEntity):
     @property
     def supported_features(self):
         """Return the supported features."""
-        return SUPPORT_BRIGHTNESS | SUPPORT_COLOR
+        return LightEntityFeature.SUPPORT_BRIGHTNESS | LightEntityFeature.SUPPORT_COLOR
 
     @property
     def supported_color_modes(self):
