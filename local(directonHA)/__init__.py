@@ -31,6 +31,7 @@ def get_alias(name):
     alias = {
         'Plug_b33b': 'Kökslampa fönster',
         'Plug_e84c': 'TV LED Strip',
+        'Light strip_e84c': 'TV LED Strip',
         'Plug_3ab9': 'Fläkt'
     }
     return alias.get(name, name)

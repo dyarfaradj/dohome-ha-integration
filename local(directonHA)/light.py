@@ -58,10 +58,10 @@ class DoHomeLight(DoHomeDevice, LightEntity):
         """Return true if light is on."""
         return self._state
 
-    @property
-    def supported_features(self):
-        """Return the supported features."""
-        return ColorMode.BRIGHTNESS | ColorMode.HS
+    # @property
+    # def supported_features(self):
+    #     """Return the supported features."""
+    #     return ColorMode.BRIGHTNESS | ColorMode.HS
 
     @property
     def supported_color_modes(self):
@@ -77,7 +77,7 @@ class DoHomeLight(DoHomeDevice, LightEntity):
     def unique_id(self):
         return self._device["name"]
 
-    def turn_on(self, **kwargs):
+    async def async_turn_on(self, **kwargs):
         """Turn the light on."""
         if ATTR_RGBWW_COLOR in kwargs:
             self._rgb = kwargs[ATTR_RGBWW_COLOR]
@@ -87,31 +87,31 @@ class DoHomeLight(DoHomeDevice, LightEntity):
 
         self._state = True
         data = {
-                "cmd":6,
-                "r":int(50 * self._rgb[0] / 255)*self._brightness,
-                "g":int(50 * self._rgb[1] / 255)*self._brightness,
-                "b":int(50 * self._rgb[2] / 255)*self._brightness,
-                "w":int(50 * self._rgb[3] / 255)*self._brightness,
-                "m":int(50 * self._rgb[4] / 255)*self._brightness
-                }
+            "cmd": 6,
+            "r": int(50 * self._rgb[0] / 255) * self._brightness,
+            "g": int(50 * self._rgb[1] / 255) * self._brightness,
+            "b": int(50 * self._rgb[2] / 255) * self._brightness,
+            "w": int(50 * self._rgb[3] / 255) * self._brightness,
+            "m": int(50 * self._rgb[4] / 255) * self._brightness
+        }
         op = json.dumps(data)
-        self._send_cmd(self._device,'cmd=ctrl&devices={[' + self._device["sid"] + ']}&op=' + op + '}', 6)
+        await self._async_send_cmd(self._device, 'cmd=ctrl&devices={[' + self._device["sid"] + ']}&op=' + op + '}', 6)
 
-    def turn_off(self, **kwargs):
+    async def async_turn_off(self, **kwargs):
         """Turn the light off."""
         self._state = False
         data = {
-                "cmd":6,
-                "r":0,
-                "g":0,
-                "b":0,
-                "w":0,
-                "m":0}
+            "cmd": 6,
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "w": 0,
+            "m": 0
+        }
         op = json.dumps(data)
-        self._send_cmd(self._device,'cmd=ctrl&devices={[' + self._device["sid"] + ']}&op=' + op + '}', 6)
+        await self._async_send_cmd(self._device, 'cmd=ctrl&devices={[' + self._device["sid"] + ']}&op=' + op + '}', 6)
 
-    def _send_cmd(self, device, cmd, rtn_cmd):
-
+    async def _async_send_cmd(self, device, cmd, rtn_cmd):
         try:
             self._socket.settimeout(0.5)
             self._socket.sendto(cmd.encode(), (device["sta_ip"], 6091))
@@ -122,9 +122,9 @@ class DoHomeLight(DoHomeDevice, LightEntity):
         if data is None:
             return None
         _LOGGER.debug("result :%s", data.decode("utf-8"))
-        dic = {i.split("=")[0]:i.split("=")[1] for i in data.decode("utf-8").split("&")}
+        dic = {i.split("=")[0]: i.split("=")[1] for i in data.decode("utf-8").split("&")}
         resp = []
-        if(dic["dev"][8:12] == device["sid"]):
+        if dic["dev"][8:12] == device["sid"]:
             resp = json.loads(dic["op"])
             if resp['cmd'] != rtn_cmd:
                 _LOGGER.debug("Non matching response. Expecting %s, but got %s", rtn_cmd, resp['cmd'])
