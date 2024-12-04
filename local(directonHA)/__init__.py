@@ -21,7 +21,7 @@ CONFIG_SCHEMA = vol.Schema({
     })
 }, extra=vol.ALLOW_EXTRA)
 
-DOHOME_COMPONENTS = ['switch', 'light', 'sensor', 'binary_sensor']
+DOHOME_COMPONENTS = ['switch', 'light', 'sensor', 'binary_sensor', 'button']
 DOHOME_GATEWAY = None
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,7 +35,6 @@ def get_alias(name):
         'Plug_3ab9': 'Fläkt'
     }
     return alias.get(name, name)
-
 
 def setup(hass, config):
     global DISCOVERY_IP
@@ -71,7 +70,7 @@ def discover_devices_service(hass, call):
     """Service to trigger device discovery for a specified duration."""
     try:
         # Validate duration with reasonable limits
-        duration = min(max(call.data.get('duration', 10), 1), 60)  # Min 1s, Max 60s
+        duration = min(max(call.data.get('duration', 10), 1), 60) if call else 10  # Min 1s, Max 60s
         
         hass.states.set(DOMAIN + '.discover_devices', 'active')
         
