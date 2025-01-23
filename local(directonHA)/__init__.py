@@ -28,6 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.INFO)
 
 def get_alias(name):
+    _LOGGER.info("found_alias: %s", name)
     alias = {
         'Plug_b33b': 'Kökslampa fönster',
         'Plug_e84c': 'TV LED Strip',
