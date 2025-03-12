@@ -83,9 +83,27 @@ def discover_devices_service(hass, call):
         discovered_devices = DOHOME_GATEWAY._discover_devices(duration)
         
         if discovered_devices:
+            device_component_map = {
+                '_STRIPE': 'light',
+                '_DT-WYRGB': 'light',
+                '_DT-PLUG': 'switch',
+                '_THIMR': ['switch', 'sensor', 'binary_sensor'],
+                '_REALY2': 'switch',
+                '_REALY4': 'switch',
+                '_MOTION': 'binary_sensor'
+            }
+            
             for device_type, devices in discovered_devices.items():
-                for device in devices:
-                    discovery.load_platform(hass, device_type, DOMAIN, {device['sid']: device}, {})
+                components = device_component_map.get(device_type, [])
+                if not isinstance(components, list):
+                    components = [components]
+                    
+                for component in components:
+                    if component:  # Skip empty components
+                        for device in devices:
+                            _LOGGER.info(f"Loading {component} for device type {device_type}: {device['name']}")
+                            discovery.load_platform(hass, component, DOMAIN, {device['sid']: device}, {})
+                            
             hass.states.set(DOMAIN + '.discover_devices', 'idle')
             return True
         else:
