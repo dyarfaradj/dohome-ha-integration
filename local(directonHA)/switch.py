@@ -14,23 +14,33 @@ _LOGGER.setLevel(logging.INFO)
 def setup_platform(hass, config, add_devices, discovery_info=None):
     switch_devices = []
     devices = DOHOME_GATEWAY.devices
+    
+    # Define device types that should be handled as lights
+    light_device_types = ['_STRIPE', '_DT-WYRGB']
+    
     for (device_type, device_info) in devices.items():
         for device in device_info:
             _LOGGER.info(device)
-            if(device['type'] == '_DT-PLUG'):
+            
+            # Skip devices that should be processed as lights
+            if device['type'] in light_device_types:
+                _LOGGER.debug(f"Skipping {device['name']} in switch component as it will be handled as a light")
+                continue
+                
+            if device['type'] == '_DT-PLUG':
                 switch_devices.append(DoHomeSwitch(hass, device["name"], "soft_poweroff", device))
-            if(device['type'] == '_THIMR'):
+            elif device['type'] == '_THIMR':
                 switch_devices.append(DoHomeSwitch(hass, device["name"], "relay", device))
-            if(device['type'] == '_REALY2'):    
+            elif device['type'] == '_REALY2':    
                 switch_devices.append(DoHomeSwitch(hass, "Relay_" + device["sid"] + '_1', "relay1", device))
                 switch_devices.append(DoHomeSwitch(hass, "Relay_" + device["sid"] + '_2', "relay2", device))
-            if(device['type'] == '_REALY4'):    
+            elif device['type'] == '_REALY4':    
                 switch_devices.append(DoHomeSwitch(hass, "Relay_" + device["sid"] + '_1', "relay1", device))
                 switch_devices.append(DoHomeSwitch(hass, "Relay_" + device["sid"] + '_2', "relay2", device))
                 switch_devices.append(DoHomeSwitch(hass, "Relay_" + device["sid"] + '_3', "relay3", device))
                 switch_devices.append(DoHomeSwitch(hass, "Relay_" + device["sid"] + '_4', "relay4", device))
     
-    if(len(switch_devices) > 0):
+    if len(switch_devices) > 0:
         add_devices(switch_devices)
 
 

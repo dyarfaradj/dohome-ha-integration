@@ -113,14 +113,15 @@ class DoHomeLight(DoHomeDevice, LightEntity):
         self._state = True
         data = {
             "cmd": 6,
-            "r": int(50 * self._rgb[0] / 255 * device_brightness),
-            "g": int(50 * self._rgb[1] / 255 * device_brightness),
-            "b": int(50 * self._rgb[2] / 255 * device_brightness),
-            "w": int(50 * self._rgb[3] / 255 * device_brightness),
-            "m": int(50 * self._rgb[4] / 255 * device_brightness)
+            "r": int(50 * self._rgb[0] / 255 * device_brightness / 100),
+            "g": int(50 * self._rgb[1] / 255 * device_brightness / 100),
+            "b": int(50 * self._rgb[2] / 255 * device_brightness / 100),
+            "w": int(50 * self._rgb[3] / 255 * device_brightness / 100),
+            "m": int(50 * self._rgb[4] / 255 * device_brightness / 100)
         }
         op = json.dumps(data)
-        await self._async_send_cmd(self._device, f'cmd=ctrl&devices={{[{self._device["sid"]}]}}&op={op}', 6)
+        cmd_str = f'cmd=ctrl&devices={{[{self._device["sid"]}]}}&op={op}'
+        await self._async_send_cmd(self._device, cmd_str, 6)
 
     async def async_turn_off(self, **kwargs):
         """Turn the light off."""
@@ -134,37 +135,53 @@ class DoHomeLight(DoHomeDevice, LightEntity):
             "m": 0
         }
         op = json.dumps(data)
-        await self._async_send_cmd(self._device, 'cmd=ctrl&devices={[' + self._device["sid"] + ']}&op=' + op + '}', 6)
+        cmd_str = f'cmd=ctrl&devices={{[{self._device["sid"]}]}}&op={op}'
+        await self._async_send_cmd(self._device, cmd_str, 6)
 
     async def _async_send_cmd(self, device: dict, cmd: str, rtn_cmd: int) -> dict | None:
-        """Send command to device."""
+        """Send command to device asynchronously."""
         try:
+            loop = asyncio.get_event_loop()
+            
+            # Create socket in non-blocking mode
             if self._socket is None:
                 self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             
             self._socket.settimeout(0.5)
-            self._socket.sendto(cmd.encode(), (device["sta_ip"], 6091))
-            data, _ = self._socket.recvfrom(1024)
             
-            if not data:
-                return None
-
-            dic = {i.split("=")[0]: i.split("=")[1] for i in data.decode("utf-8").split("&")}
+            # Send command
+            _LOGGER.debug("Sending to %s: %s", device["sta_ip"], cmd)
+            await loop.sock_sendto(self._socket, cmd.encode(), (device["sta_ip"], 6091))
             
-            if dic["dev"][8:12] != device["sid"]:
-                _LOGGER.debug("Non matching device: %s != %s", device["sid"], dic["dev"][8:12])
+            # Receive response in a way that doesn't block the event loop
+            try:
+                data, _ = await asyncio.wait_for(
+                    loop.sock_recvfrom(self._socket, 1024),
+                    timeout=1.0
+                )
+                
+                if not data:
+                    _LOGGER.debug("No data received")
+                    return None
+
+                dic = {i.split("=")[0]: i.split("=")[1] for i in data.decode("utf-8").split("&")}
+                _LOGGER.debug("Response: %s", dic)
+                
+                if dic["dev"][8:12] != device["sid"]:
+                    _LOGGER.debug("Non matching device: %s != %s", device["sid"], dic["dev"][8:12])
+                    return None
+
+                resp = json.loads(dic["op"])
+                if resp['cmd'] != rtn_cmd:
+                    _LOGGER.debug("Non matching response cmd: %s != %s", rtn_cmd, resp['cmd'])
+                    return None
+
+                return resp
+
+            except asyncio.TimeoutError:
+                _LOGGER.debug("Timeout receiving response from %s", device["sta_ip"])
                 return None
-
-            resp = json.loads(dic["op"])
-            if resp['cmd'] != rtn_cmd:
-                _LOGGER.debug("Non matching response cmd: %s != %s", rtn_cmd, resp['cmd'])
-                return None
-
-            return resp
-
-        except socket.timeout:
-            _LOGGER.debug("Timeout sending command to %s", device["sta_ip"])
-            return None
+                
         except Exception as ex:
-            _LOGGER.error("Error sending command: %s", str(ex))
+            _LOGGER.error("Error in async_send_cmd: %s", str(ex))
             return None
