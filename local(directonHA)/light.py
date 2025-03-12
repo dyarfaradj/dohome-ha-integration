@@ -113,11 +113,11 @@ class DoHomeLight(DoHomeDevice, LightEntity):
         self._state = True
         data = {
             "cmd": 6,
-            "r": int(50 * self._rgb[0] / 255 * device_brightness / 100),
-            "g": int(50 * self._rgb[1] / 255 * device_brightness / 100),
-            "b": int(50 * self._rgb[2] / 255 * device_brightness / 100),
-            "w": int(50 * self._rgb[3] / 255 * device_brightness / 100),
-            "m": int(50 * self._rgb[4] / 255 * device_brightness / 100)
+            "r": int(50 * self._rgb[0] / 255 * device_brightness),
+            "g": int(50 * self._rgb[1] / 255 * device_brightness),
+            "b": int(50 * self._rgb[2] / 255 * device_brightness),
+            "w": int(50 * self._rgb[3] / 255 * device_brightness),
+            "m": int(50 * self._rgb[4] / 255 * device_brightness)
         }
         op = json.dumps(data)
         cmd_str = f'cmd=ctrl&devices={{[{self._device["sid"]}]}}&op={op}'
