@@ -29,11 +29,12 @@ async def async_setup_platform(
     light_devices = []
     devices = DOHOME_GATEWAY.devices
     for (device_type, device_info) in devices.items():
-        _LOGGER.info(f"Processing device type: {device_type}")
         for device in device_info:
-            _LOGGER.info(f"Device info: {device}")
             if device['type'] in ['_STRIPE', '_DT-WYRGB']:
+                _LOGGER.info(f"Adding light device: {device['name']} (type: {device['type']})")
                 light_devices.append(DoHomeLight(hass, device))
+            else:
+                _LOGGER.debug(f"Skipping non-light device: {device['name']} (type: {device['type']})")
     
     if light_devices:
         async_add_entities(light_devices)
